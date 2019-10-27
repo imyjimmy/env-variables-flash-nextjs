@@ -47,6 +47,9 @@ export default function Index() {
         <Typography variant='h2'>
           process.env.GRAPHQL_YOGA_ENDPOINT: {process.env.GRAPHQL_YOGA_ENDPOINT}
           process.env.STUFF: {process.env.STUFF}
+          process.env.NEXT_SERVER_TEST_1: {process.env.NEXT_SERVER_TEST_1}
+          process.env.NEXT_STATIC_TEST_1: {process.env.NEXT_STATIC_TEST_1}
+          process.env.customKey: {process.env.customKey}
         </Typography>
         <div>Some other text.</div>
       </Grid>

@@ -1,6 +1,21 @@
-const env = require('dotenv').config()
+// const env = require('dotenv').config()
 const withCSS = require('@zeit/next-css')
-const webpack = require('webpack')
+// const webpack = require('webpack')
+
+// an example from https://github.com/formatlos/next-env
+const withPlugins = require('next-compose-plugins')
+const nextEnv = require('next-env')
+const dotenvLoad = require('dotenv-load')
+
+dotenvLoad()
+
+const nextConfig = {
+  distDir: 'build',
+  target: 'serverless',
+  env: {
+    customKey: 'value',
+  },
+}
 
 if (typeof require !== 'undefined') {
   require.extensions['.less'] = () => {}
@@ -24,26 +39,48 @@ function HACK_removeMinimizeOptionFromCssLoaders(config) {
   })
 }
 
-module.exports = withCSS({
-  webpack: (config, options) => {
-    console.log('graphql-yoga-endpoint: ', process.env.GRAPHQL_YOGA_ENDPOINT)
-    console.log('node_env', process.env.NODE_ENV)
-    config.module.rules.push({
-      test: /\.png$/,
-      loader: require.resolve('url-loader'),
-    })
+module.exports = withPlugins(
+  [
+    nextEnv(),
+    [
+      withCSS,
+      {
+        webpack: (config, options) => {
+          config.module.rules.push({
+            test: /\.png$/,
+            loader: require.resolve('url-loader'),
+          })
 
-    config.plugins.push(new webpack.EnvironmentPlugin(env))
+          HACK_removeMinimizeOptionFromCssLoaders(config)
 
-    HACK_removeMinimizeOptionFromCssLoaders(config)
+          config.node = {
+            fs: 'empty',
+          }
 
-    config.node = {
-      fs: 'empty',
-    }
-    console.log('config:', config)
-    console.log('env: ', env)
-    return config
-  },
-  distDir: 'build',
-  target: 'serverless',
-})
+          return config
+        },
+      },
+    ],
+  ],
+  nextConfig
+)
+
+// module.exports = withCSS({
+//   webpack: (config, options) => {
+//     config.module.rules.push({
+//       test: /\.png$/,
+//       loader: require.resolve('url-loader'),
+//     })
+
+//     //config.plugins.push(new webpack.EnvironmentPlugin(env))
+
+//     HACK_removeMinimizeOptionFromCssLoaders(config)
+
+//     config.node = {
+//       fs: 'empty',
+//     }
+//     // console.log('config:', config)
+//     // console.log('env: ', env)
+//     return config
+//   }
+// })
